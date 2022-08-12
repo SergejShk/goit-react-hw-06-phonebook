@@ -1,7 +1,24 @@
-import PropTypes from 'prop-types';
+import { useDispatch, useSelector } from 'react-redux';
+import { deleteContactFromLS } from 'redux/contacts/contactsActions';
 import s from './ContactsList.module.css';
 
-const ContactsList = ({ filterSearchContact, deleteContact }) => {
+const ContactsList = () => {
+  const dispatch = useDispatch();
+
+  const contacts = useSelector(state => state.contacts.items);
+  const filter = useSelector(state => state.contacts.filter);
+
+  const getFilterSearchContact = () => {
+    const normalizedFilter = filter.toLowerCase().trim();
+    return contacts.filter(contact =>
+      contact.name.toLowerCase().includes(normalizedFilter)
+    );
+  };
+
+  const deleteContact = id => dispatch(deleteContactFromLS(id));
+
+  const filterSearchContact = getFilterSearchContact();
+
   return (
     <ul className={s.contactsList}>
       {filterSearchContact.map(contact => (
@@ -16,17 +33,6 @@ const ContactsList = ({ filterSearchContact, deleteContact }) => {
       ))}
     </ul>
   );
-};
-
-ContactsList.propTypes = {
-  filterSearchContact: PropTypes.arrayOf(
-    PropTypes.shape({
-      id: PropTypes.string.isRequired,
-      name: PropTypes.string.isRequired,
-      number: PropTypes.string.isRequired,
-    })
-  ),
-  deleteContact: PropTypes.func.isRequired,
 };
 
 export default ContactsList;

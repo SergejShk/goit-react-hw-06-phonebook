@@ -1,8 +1,13 @@
-import PropTypes from 'prop-types';
+import { Report } from 'notiflix/build/notiflix-report-aio';
 import s from './ContactForm.module.css';
 import { useState } from 'react';
+import { addContactToLS } from 'redux/contacts/contactsActions';
+import { useDispatch, useSelector } from 'react-redux';
 
-const ContactForm = ({ addContact }) => {
+const ContactForm = () => {
+  const dispatch = useDispatch();
+  const contacts = useSelector(state => state.contacts.items);
+
   const [name, setName] = useState('');
   const [number, setNumber] = useState('');
 
@@ -15,14 +20,25 @@ const ContactForm = ({ addContact }) => {
 
   const handleSubmitForm = e => {
     e.preventDefault();
+    const data = { name: name, number: number };
 
-    addContact({ name: name, number: number });
+    if (checkRepeatContact(data)) {
+      return Report.failure(`${data.name} is already in contacts.`);
+    }
+    dispatch(addContactToLS(data));
+
     resetForm();
   };
 
   const resetForm = () => {
     setName('');
     setNumber('');
+  };
+
+  const checkRepeatContact = data => {
+    return contacts.find(
+      contact => contact.name.toLowerCase() === data.name.toLowerCase()
+    );
   };
 
   return (
@@ -59,7 +75,5 @@ const ContactForm = ({ addContact }) => {
     </form>
   );
 };
-
-ContactForm.propTypes = { addContact: PropTypes.func.isRequired };
 
 export default ContactForm;
